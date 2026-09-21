@@ -1,0 +1,177 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: #f4f6f8;
+  color: #1a1f26;
+}
+
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.app-header h1 {
+  font-size: 1.4rem;
+  margin: 0;
+}
+
+button {
+  cursor: pointer;
+  border: 1px solid #2b6cb0;
+  background: #2b6cb0;
+  color: white;
+  border-radius: 6px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.9rem;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button.secondary {
+  background: white;
+  color: #2b6cb0;
+}
+
+.steps {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.step {
+  background: white;
+  color: #444;
+  border: 1px solid #d0d7de;
+}
+
+.step.active {
+  background: #2b6cb0;
+  color: white;
+  border-color: #2b6cb0;
+}
+
+.panel {
+  background: white;
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.panel h2 {
+  margin-top: 0;
+}
+
+.hint {
+  color: #5b6773;
+  font-size: 0.9rem;
+  max-width: 60ch;
+}
+
+.form-row {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+}
+
+.form-row label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.8rem;
+  color: #5b6773;
+  gap: 0.25rem;
+}
+
+input,
+select {
+  padding: 0.4rem 0.5rem;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid #eef0f2;
+  font-size: 0.9rem;
+}
+
+.table .empty {
+  color: #9aa4ad;
+  font-style: italic;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: #c0392b;
+  padding: 0;
+  font-size: 0.85rem;
+}
+
+.court-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.court-column h4 {
+  margin-bottom: 0.5rem;
+}
+
+.court-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.match-card {
+  border-radius: 8px;
+  padding: 0.5rem 0.6rem;
+  border-left: 4px solid #2b6cb0;
+  background: #eef4fb;
+  font-size: 0.85rem;
+}
+
+.match-card.playoff {
+  border-left-color: #b7791f;
+  background: #fbf3e6;
+}
+
+.match-card .time {
+  font-weight: 600;
+}
+
+.match-card .meta {
+  color: #5b6773;
+  font-size: 0.75rem;
+  margin: 0.1rem 0;
+}
