@@ -15,18 +15,7 @@ function entrantLabel(store: TournamentStore, classId: string, entrantId: string
 }
 
 export function SchedulePanel({ store }: { store: TournamentStore }) {
-  const dayStart = store.settings.dayStartMinutes;
   const canGenerate = store.classes.length > 0 && store.courts.length > 0;
-
-  const scheduledByCourt = new Map<string, ScheduledMatch[]>();
-  if (store.schedule) {
-    for (const sm of store.schedule.scheduled) {
-      const list = scheduledByCourt.get(sm.courtId) ?? [];
-      list.push(sm);
-      scheduledByCourt.set(sm.courtId, list);
-    }
-    for (const list of scheduledByCourt.values()) list.sort((a, b) => a.startMinutes - b.startMinutes);
-  }
 
   return (
     <div className="panel">
@@ -42,17 +31,6 @@ export function SchedulePanel({ store }: { store: TournamentStore }) {
             onChange={(e) => store.updateSettings({ minRestMinutes: Number(e.target.value) })}
           />
         </label>
-        <label>
-          Day starts at
-          <input
-            type="time"
-            value={formatClock(0, dayStart)}
-            onChange={(e) => {
-              const [h, m] = e.target.value.split(":").map(Number);
-              store.updateSettings({ dayStartMinutes: h * 60 + (m || 0) });
-            }}
-          />
-        </label>
         <button disabled={!canGenerate} onClick={() => store.generateSchedule()}>
           Generate schedule
         </button>
@@ -62,31 +40,46 @@ export function SchedulePanel({ store }: { store: TournamentStore }) {
 
       {store.schedule && (
         <>
-          <h3>Per court</h3>
-          <div className="court-grid">
-            {store.courts.map((court) => (
-              <div key={court.id} className="court-column">
-                <h4>{court.name}</h4>
-                <ul>
-                  {(scheduledByCourt.get(court.id) ?? []).map((sm) => (
-                    <li key={sm.match.id} className={`match-card ${sm.match.phase}`}>
-                      <div className="time">
-                        {formatClock(sm.startMinutes, dayStart)}–{formatClock(sm.endMinutes, dayStart)}
-                      </div>
-                      <div className="meta">
-                        {classLabel(store, sm.match.classId)} · {sm.match.phase === "group" ? `Group ${sm.match.groupName}` : sm.match.round}
-                      </div>
-                      <div className="entrants">
-                        {entrantLabel(store, sm.match.classId, sm.match.entrantAId)} vs{" "}
-                        {entrantLabel(store, sm.match.classId, sm.match.entrantBId)}
-                      </div>
-                    </li>
+          {store.days.map((day) => {
+            const dayMatches = store.schedule!.scheduled.filter((sm) => sm.dayId === day.id);
+            const scheduledByCourt = new Map<string, ScheduledMatch[]>();
+            for (const sm of dayMatches) {
+              const list = scheduledByCourt.get(sm.courtId) ?? [];
+              list.push(sm);
+              scheduledByCourt.set(sm.courtId, list);
+            }
+            for (const list of scheduledByCourt.values()) list.sort((a, b) => a.startMinutes - b.startMinutes);
+
+            return (
+              <div key={day.id} className="day-section">
+                <h3>{day.label}</h3>
+                <div className="court-grid">
+                  {store.courts.map((court) => (
+                    <div key={court.id} className="court-column">
+                      <h4>{court.name}</h4>
+                      <ul>
+                        {(scheduledByCourt.get(court.id) ?? []).map((sm) => (
+                          <li key={sm.match.id} className={`match-card ${sm.match.phase}`}>
+                            <div className="time">
+                              {formatClock(sm.startMinutes, day.startMinutes)}–{formatClock(sm.endMinutes, day.startMinutes)}
+                            </div>
+                            <div className="meta">
+                              {classLabel(store, sm.match.classId)} · {sm.match.phase === "group" ? `Group ${sm.match.groupName}` : sm.match.round}
+                            </div>
+                            <div className="entrants">
+                              {entrantLabel(store, sm.match.classId, sm.match.entrantAId)} vs{" "}
+                              {entrantLabel(store, sm.match.classId, sm.match.entrantBId)}
+                            </div>
+                          </li>
+                        ))}
+                        {(scheduledByCourt.get(court.id) ?? []).length === 0 && <li className="empty">No matches</li>}
+                      </ul>
+                    </div>
                   ))}
-                  {(scheduledByCourt.get(court.id) ?? []).length === 0 && <li className="empty">No matches</li>}
-                </ul>
+                </div>
               </div>
-            ))}
-          </div>
+            );
+          })}
 
           {store.schedule.unscheduled.length > 0 && (
             <>

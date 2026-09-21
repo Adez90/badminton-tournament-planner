@@ -1,5 +1,6 @@
-// Pure domain types — no React/DOM imports. This module (plus scheduler.ts
-// and groups.ts) is meant to be reusable as-is behind a future backend.
+// Pure domain types — no React/DOM imports. This module (plus groups.ts,
+// tournament.ts and scheduler.ts) is meant to be reusable as-is behind a
+// future backend.
 
 export type EventType = "MS" | "WS" | "MD" | "WD" | "XD";
 
@@ -30,9 +31,18 @@ export interface TournamentClass {
   avgGroupMatchMinutes: number;
   /** Average minutes for one playoff match in this class (often longer). */
   avgPlayoffMatchMinutes: number;
+  /** Preferred number of entrants per group (pool). Actual pools may be
+   * this size +/-1 to use up remainders (e.g. target 4 -> pools of 3/4/5). */
+  targetGroupSize: number;
   /** How many entrants advance from each group to the playoff bracket. */
   groupAdvanceCount: number;
   entrants: Entrant[];
+  /** Scheduling order relative to other classes — lower runs earlier.
+   * Drives the wave/pipeline ordering (see tournament.ts). */
+  priority: number;
+  /** If set, every match in this class must fall on this tournament day.
+   * Undefined = the pipeline may place it on whichever day has room. */
+  dayId?: string;
 }
 
 export type MatchPhase = "group" | "playoff";
@@ -51,8 +61,18 @@ export interface Match {
   playerIds: string[];
 }
 
-export interface TimeWindow {
-  /** Minutes from tournament day start, e.g. 09:00 -> 0 if day starts 09:00. */
+/** One day of the tournament, e.g. Saturday / Sunday. */
+export interface TournamentDay {
+  id: string;
+  label: string;
+  /** Minutes since midnight this day's schedule starts, for display (e.g. 540 = 09:00). */
+  startMinutes: number;
+}
+
+/** A court's opening window on one specific tournament day, in minutes
+ * relative to that day's own startMinutes (0 = that day's start time). */
+export interface CourtWindow {
+  dayId: string;
   startMinutes: number;
   endMinutes: number;
 }
@@ -60,12 +80,14 @@ export interface TimeWindow {
 export interface Court {
   id: string;
   name: string;
-  availableWindows: TimeWindow[];
+  availableWindows: CourtWindow[];
 }
 
 export interface ScheduledMatch {
   match: Match;
   courtId: string;
+  dayId: string;
+  /** Minutes relative to dayId's own startMinutes. */
   startMinutes: number;
   endMinutes: number;
 }
@@ -73,8 +95,6 @@ export interface ScheduledMatch {
 export interface SchedulingSettings {
   /** Minimum rest minutes required between two matches for the same player. */
   minRestMinutes: number;
-  /** Minutes-since-midnight the tournament day starts, for display only. */
-  dayStartMinutes: number;
 }
 
 export interface UnscheduledMatch {

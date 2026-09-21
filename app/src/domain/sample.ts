@@ -1,4 +1,4 @@
-import type { Court, Entrant, Player, TournamentClass } from "./types";
+import type { Court, Entrant, Player, TournamentClass, TournamentDay } from "./types";
 
 function id(prefix: string, n: number): string {
   return `${prefix}-${n}`;
@@ -6,8 +6,15 @@ function id(prefix: string, n: number): string {
 
 /** Small demo dataset so the schedule view can be tried without typing
  * in real participants first. Loaded on demand via a "Load sample data"
- * button, never automatically. */
-export function buildSampleData(): { players: Player[]; classes: TournamentClass[]; courts: Court[] } {
+ * button, never automatically. Spans two days to exercise multi-day
+ * scheduling, and pins doubles/mixed to day 2 to demonstrate the
+ * "singles day 1, doubles day 2" preference. */
+export function buildSampleData(): {
+  players: Player[];
+  classes: TournamentClass[];
+  courts: Court[];
+  days: TournamentDay[];
+} {
   const names = [
     "Anna Berg", "Erik Lund", "Maja Sten", "Oskar Nyström", "Klara Holm",
     "Viktor Ek", "Elin Dahl", "Filip Sund", "Nora Vik", "Axel Berg",
@@ -22,13 +29,21 @@ export function buildSampleData(): { players: Player[]; classes: TournamentClass
     seed,
   });
 
+  const days: TournamentDay[] = [
+    { id: "day-1", label: "Saturday", startMinutes: 9 * 60 },
+    { id: "day-2", label: "Sunday", startMinutes: 9 * 60 },
+  ];
+
   const wsA: TournamentClass = {
     id: "ws-a",
     eventType: "WS",
     skillClass: "A",
     avgGroupMatchMinutes: 25,
     avgPlayoffMatchMinutes: 35,
+    targetGroupSize: 4,
     groupAdvanceCount: 2,
+    priority: 0,
+    dayId: "day-1",
     entrants: [entrantOf(0, 1), entrantOf(2, 2), entrantOf(4), entrantOf(6), entrantOf(8), entrantOf(10)],
   };
 
@@ -38,7 +53,10 @@ export function buildSampleData(): { players: Player[]; classes: TournamentClass
     skillClass: "B",
     avgGroupMatchMinutes: 22,
     avgPlayoffMatchMinutes: 30,
+    targetGroupSize: 4,
     groupAdvanceCount: 2,
+    priority: 1,
+    dayId: "day-1",
     entrants: [entrantOf(1, 1), entrantOf(3), entrantOf(5), entrantOf(7), entrantOf(9)],
   };
 
@@ -48,7 +66,10 @@ export function buildSampleData(): { players: Player[]; classes: TournamentClass
     skillClass: "C",
     avgGroupMatchMinutes: 28,
     avgPlayoffMatchMinutes: 38,
+    targetGroupSize: 4,
     groupAdvanceCount: 1,
+    priority: 2,
+    dayId: "day-2",
     entrants: [
       { id: "e-xd-1", playerIds: [players[0].id, players[1].id], seed: 1 },
       { id: "e-xd-2", playerIds: [players[2].id, players[3].id] },
@@ -58,10 +79,31 @@ export function buildSampleData(): { players: Player[]; classes: TournamentClass
   };
 
   const courts: Court[] = [
-    { id: "court-1", name: "Court 1", availableWindows: [{ startMinutes: 0, endMinutes: 480 }] },
-    { id: "court-2", name: "Court 2", availableWindows: [{ startMinutes: 0, endMinutes: 480 }] },
-    { id: "court-3", name: "Court 3", availableWindows: [{ startMinutes: 60, endMinutes: 420 }] },
+    {
+      id: "court-1",
+      name: "Court 1",
+      availableWindows: [
+        { dayId: "day-1", startMinutes: 0, endMinutes: 480 },
+        { dayId: "day-2", startMinutes: 0, endMinutes: 480 },
+      ],
+    },
+    {
+      id: "court-2",
+      name: "Court 2",
+      availableWindows: [
+        { dayId: "day-1", startMinutes: 0, endMinutes: 480 },
+        { dayId: "day-2", startMinutes: 0, endMinutes: 480 },
+      ],
+    },
+    {
+      id: "court-3",
+      name: "Court 3",
+      availableWindows: [
+        { dayId: "day-1", startMinutes: 60, endMinutes: 420 },
+        { dayId: "day-2", startMinutes: 60, endMinutes: 420 },
+      ],
+    },
   ];
 
-  return { players, classes: [wsA, msB, xdC], courts };
+  return { players, classes: [wsA, msB, xdC], courts, days };
 }

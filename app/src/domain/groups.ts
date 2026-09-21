@@ -1,17 +1,22 @@
 import type { Entrant, Match, TournamentClass } from "./types";
 
 /**
- * Split entrants into pools, preferring size 4 and falling back to 3 or 5
- * to use up remainders, per SBF convention. Seeded entrants (lower seed
- * number = stronger) are distributed round-robin across pools so the top
- * seeds don't end up in the same group.
+ * Split entrants into pools around a target size, per SBF convention
+ * (target 4, falling back to 3 or 5 to use up remainders) — except here
+ * the target size is whatever the organizer configured for the class.
+ * Seeded entrants (lower seed number = stronger) are distributed
+ * round-robin across pools so the top seeds don't end up in the same group.
  */
-export function makeGroups(entrants: Entrant[]): { name: string; entrants: Entrant[] }[] {
+export function makeGroups(
+  entrants: Entrant[],
+  targetGroupSize: number = 4,
+): { name: string; entrants: Entrant[] }[] {
   const n = entrants.length;
   if (n === 0) return [];
-  if (n <= 5) return [{ name: "A", entrants }];
+  const size = Math.max(2, targetGroupSize);
+  if (n <= size + 1) return [{ name: "A", entrants }];
 
-  const groupCount = Math.round(n / 4);
+  const groupCount = Math.max(1, Math.round(n / size));
   const sorted = [...entrants].sort((a, b) => (a.seed ?? 999) - (b.seed ?? 999));
   const groups: Entrant[][] = Array.from({ length: groupCount }, () => []);
 
@@ -60,7 +65,7 @@ export function roundRobinMatches(
 
 /** Generates all group-stage matches for a class. */
 export function generateGroupMatches(cls: TournamentClass): Match[] {
-  const groups = makeGroups(cls.entrants);
+  const groups = makeGroups(cls.entrants, cls.targetGroupSize);
   return groups.flatMap((g) => roundRobinMatches(cls.id, g.name, g.entrants));
 }
 

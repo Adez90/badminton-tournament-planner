@@ -133,6 +133,29 @@ select {
   font-size: 0.85rem;
 }
 
+.icon-btn {
+  padding: 0.15rem 0.4rem;
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.order-cell {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.day-section {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eef0f2;
+}
+
+.day-section:first-of-type {
+  margin-top: 0.5rem;
+  border-top: none;
+  padding-top: 0;
+}
+
 .court-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
